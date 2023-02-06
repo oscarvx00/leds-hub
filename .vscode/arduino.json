@@ -1,0 +1,6 @@
+{
+    "board": "arduino:avr:uno",
+    "programmer": "avrisp",
+    "port": "/dev/ttyUSB0",
+    "sketch": "leds-hub.ino"
+}
