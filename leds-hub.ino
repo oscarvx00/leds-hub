@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-void setup() {
-  // put your setup code here, to run once:
-=======
 #include "src/api/api.h"
 #include "src/led/led.h"
 #include <ESP8266WiFi.h>
@@ -30,11 +26,15 @@ void setup() {
     delay(1000);
     Serial.println("Connecting to WiFi...");
   }
->>>>>>> 462f843... .
+
+  api.setup();
+  server.begin();
+
+  Serial.println("Connected...");
 
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-
+  server.handleClient();
 }

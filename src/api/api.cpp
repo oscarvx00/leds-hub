@@ -72,6 +72,8 @@ void API::staticLed() {
       return;
     }
 
+    //Serial.println(jsonDoc[0]);
+
     if (jsonDoc.containsKey("color")) {
       String color = jsonDoc["color"];
       int colorInt = 0;
