@@ -22,6 +22,7 @@ void handleSensor(ESP8266WebServer &server) {
 void API::setup() {
   server_.on("/led", HTTP_POST, [this]() { handleLed(); });
   server_.on("/led/static", HTTP_POST, [this]() { staticLed(); });
+  server_.on("/led/staticFade3", HTTP_POST, [this]() { staticFade3(); });
 }
 
 void API::handleLed() {
@@ -62,7 +63,7 @@ void API::handleLed() {
 
 
 void API::staticLed() {
-  StaticJsonDocument<200> jsonDoc;
+  StaticJsonDocument<400> jsonDoc;
 
   if (server_.hasArg("plain") && server_.arg("plain").length() > 0) {
     DeserializationError error = deserializeJson(jsonDoc, server_.arg("plain"));
@@ -72,9 +73,19 @@ void API::staticLed() {
       return;
     }
 
-    //Serial.println(jsonDoc[0]);
+    for(int index = 0; index<3; index++){
+      int strip = jsonDoc["request"][index]["strip"];
+      const char* color = jsonDoc["request"][index]["color"]; // "0x110000"
 
-    if (jsonDoc.containsKey("color")) {
+      int colorInt = 0;
+      sscanf(color, "%x", &colorInt);
+
+      led_.setStatic(colorInt, strip);
+    }
+
+    server_.send(200, "text/plain", "OK");
+
+    /*if (jsonDoc.containsKey("color")) {
       String color = jsonDoc["color"];
       int colorInt = 0;
       sscanf(color.c_str(), "%x", &colorInt);
@@ -82,7 +93,48 @@ void API::staticLed() {
       server_.send(200, "text/plain", "OK");
     } else {
       server_.send(400, "text/plain", "Missing color argument");
+    }*/
+  } else {
+    server_.send(400, "text/plain", "Missing request body");
+  }
+}
+
+
+void API::staticFade3() {
+  StaticJsonDocument<400> jsonDoc;
+
+  if (server_.hasArg("plain") && server_.arg("plain").length() > 0) {
+    DeserializationError error = deserializeJson(jsonDoc, server_.arg("plain"));
+
+    if (error) {
+      server_.send(400, "text/plain", "Invalid JSON");
+      return;
     }
+
+    int colors[] = {0,0,0};
+
+    for(int index = 0; index<3; index++){
+      const char* color = jsonDoc["request"][index]["color"]; // "0x110000"
+
+      int colorInt = 0;
+      sscanf(color, "%x", &colorInt);
+
+      colors[index] = colorInt;
+    }
+
+    led_.setStaticFade3(colors[0], colors[1], colors[2]);
+
+    server_.send(200, "text/plain", "OK");
+
+    /*if (jsonDoc.containsKey("color")) {
+      String color = jsonDoc["color"];
+      int colorInt = 0;
+      sscanf(color.c_str(), "%x", &colorInt);
+      led_.setStatic(colorInt);
+      server_.send(200, "text/plain", "OK");
+    } else {
+      server_.send(400, "text/plain", "Missing color argument");
+    }*/
   } else {
     server_.send(400, "text/plain", "Missing request body");
   }

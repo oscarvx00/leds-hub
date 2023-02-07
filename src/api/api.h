@@ -17,6 +17,7 @@ class API {
         Led &led_;
         void handleLed();
         void staticLed();
+        void staticFade3();
 };
 
 #endif
